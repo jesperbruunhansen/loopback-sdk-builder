@@ -98,6 +98,7 @@
     "mkdirp": "0.5.1",
     "optimist": "0.6.1",
     "rimraf": "2.5.3",
+    "rxjs": "^5.2.1-smooth",
     "semver": "4.3.2",
     "underscore": "^1.8.3",
     "underscore.inflections": "^0.2.1"
