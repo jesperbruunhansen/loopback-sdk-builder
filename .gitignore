@@ -43,5 +43,5 @@ typings
 .DS_Store
 
 tests/
-!tests/fireloop
+!tests/fireloop/
 !tests/ng2web

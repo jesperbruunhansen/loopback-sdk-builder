@@ -23,6 +23,8 @@ export class LoopBackAuth {
    **/
   protected prefix: string = '$LoopBackSDK$';
 
+  private loadedToken: Promise<any>;
+
   /**
    * @method constructor
    * @param {InternalStorage} storage Internal Storage Driver
@@ -30,13 +32,30 @@ export class LoopBackAuth {
    * The constructor will initialize the token loading data from storage
    **/
   constructor(@Inject(InternalStorage) protected storage: InternalStorage) {
-    /*    this.token.id = this.load('id');
-     this.token.user = this.load('user');
-     this.token.userId = this.load('userId');
-     this.token.issuedAt = this.load('issuedAt');
-     this.token.created = this.load('created');
-     this.token.ttl = this.load('ttl');
-     this.token.rememberMe = this.load('rememberMe');*/
+    this.loadedToken = new Promise((resolve, reject) => {
+      Promise.all([
+        this.load('id'),
+        this.load('user'),
+        this.load('userId'),
+        this.load('issuedAt'),
+        this.load('created'),
+        this.load('ttl'),
+        this.load('rememberMe')
+      ]).then(data => {
+        this.token.id = data[0];
+        this.token.user = data[1];
+        this.token.userId = data[2];
+        this.token.issuedAt = data[3];
+        this.token.created = data[4];
+        this.token.ttl = data[5];
+        this.token.rememberMe = data[6];
+        resolve(this.token);
+      });
+    });
+  }
+
+  public ready():Promise<any>{
+    return this.loadedToken;
   }
 
   /**
@@ -58,7 +77,7 @@ export class LoopBackAuth {
    * This method will update the user information and persist it if the
    * rememberMe flag is set.
    **/
-  public setUser(user: any) : Promise<any>{
+  public setUser(user: any): Promise<any> {
     this.token.user = user;
     return this.save();
   }
@@ -81,8 +100,10 @@ export class LoopBackAuth {
    * @description
    * This method will set a flag in order to remember the current credentials.
    **/
-  public getToken(): SDKToken {
-    return <SDKToken> this.token;
+  public getToken(): Promise<SDKToken> {
+    return this.ready().then(() => {
+      return Promise.resolve(this.token);
+    });
   }
 
   /**
@@ -91,7 +112,7 @@ export class LoopBackAuth {
    * @description
    * This method will return the actual token string, not the object instance.
    **/
-  public getAccessTokenId(): Promise<any>{
+  public getAccessTokenId(): Promise<any> {
     return this.load('id');
   }
 
