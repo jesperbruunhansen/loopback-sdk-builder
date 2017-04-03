@@ -41,3 +41,7 @@ typings
 
 #System Files
 .DS_Store
+
+tests/
+!tests/fireloop
+!tests/ng2web

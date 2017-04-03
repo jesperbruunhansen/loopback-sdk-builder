@@ -1,3 +1,76 @@
+
+/* tslint:disable */
+import { Injectable } from '@angular/core';
+import { Storage } from "@ionic/storage";
+
+
 /**
- * Created by jesperbruunhansen on 03/04/2017.
- */
+ * @author Jonathan Casarrubias <twitter:@johncasarrubias> <github:@mean-expert-official>
+ * @module StorageBrowser
+ * @license MIT
+ * @description
+ * This module handle localStorage, it will be provided using DI Swapping according the
+ * SDK Socket Driver Available currently supporting Angular 2 for web and NativeScript 2.
+ **/
+@Injectable()
+export class StorageIonic {
+
+    private storage: Storage;
+
+    constructor(){
+        this.storage = new Storage({});
+    }
+
+    /**
+     * @method get
+     * @param {string} key Storage key name
+     * @return {any}
+     * @description
+     * The getter will return any type of data persisted in localStorage.
+     **/
+    get(key: string): Promise<any> {
+        return this.storage.get(key).then(data => {
+            return Promise.resolve(this.parse(data))
+        });
+    }
+
+    /**
+     * @method set
+     * @param {string} key Storage key name
+     * @param {any} value Any value
+     * @return {void}
+     * @description
+     * The setter will return any type of data persisted in localStorage.
+     **/
+    set(key: string, value: any): Promise<any> {
+        return this.storage.set(
+            key,
+            typeof value === 'object' ? JSON.stringify(value) : value
+        );
+    }
+    /**
+     * @method remove
+     * @param {string} key Storage key name
+     * @return {void}
+     * @description
+     * This method will remove a localStorage item from the client.
+     **/
+    remove(key: string): Promise<any> {
+        return this.storage.remove(key)
+    }
+    /**
+     * @method parse
+     * @param {any} value Input data expected to be JSON
+     * @return {void}
+     * @description
+     * This method will parse the string as JSON if possible, otherwise will
+     * return the value itself.
+     **/
+    private parse(value: any) {
+        try {
+            return JSON.parse(value);
+        } catch (e) {
+            return value;
+        }
+    }
+}
