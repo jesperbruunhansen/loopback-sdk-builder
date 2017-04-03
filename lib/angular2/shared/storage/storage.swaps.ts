@@ -6,7 +6,7 @@
  * The InternalStorage class is used for dependency injection swapping.
  * It will be provided using factory method from different sources.
  **/
-export interface Storage {
+export class Storage {
   /**
    * @method get
    * @param {string} key Storage key name
@@ -14,7 +14,7 @@ export interface Storage {
    * @description
    * The getter will return any type of data persisted in storage.
    **/
-  get<T>(key: string): Promise<any>
+  get<T>(key: string): Promise<any> {}
   /**
    * @method set
    * @param {string} key Storage key name
@@ -23,7 +23,7 @@ export interface Storage {
    * @description
    * The setter will return any type of data persisted in localStorage.
    **/
-  set(key: string, value: any): Promise<any>
+  set(key: string, value: any): Promise<any> {}
   /**
    * @method remove
    * @param {string} key Storage key name
@@ -31,7 +31,7 @@ export interface Storage {
    * @description
    * This method will remove a localStorage item from the client.
    **/
-  remove(key: string): Promise<any>
+  remove(key: string): Promise<any> {}
 }
 /**
  * @module InternalStorage
@@ -43,7 +43,7 @@ export interface Storage {
  * This is mainly required because Angular Universal integration.
  * It does inject a CookieStorage instead of LocalStorage.
  **/
-export class InternalStorage implements Storage {}
+export class InternalStorage extends Storage {}
 /**
  * @module SDKStorage
  * @author Jonathan Casarrubias <t: johncasarrubias, gh: mean-expert-official>
@@ -54,4 +54,4 @@ export class InternalStorage implements Storage {}
  * This is created for public usage, to allow persisting custom data
  * Into the local storage API.
  **/
-export class SDKStorage implements Storage {}
+export class SDKStorage extends Storage {}
