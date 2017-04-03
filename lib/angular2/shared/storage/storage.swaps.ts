@@ -14,7 +14,7 @@ export class Storage {
    * @description
    * The getter will return any type of data persisted in storage.
    **/
-  get<T>(key: string): Promise<any> {}
+  get<T>(key: string): any {}
   /**
    * @method set
    * @param {string} key Storage key name
@@ -23,7 +23,7 @@ export class Storage {
    * @description
    * The setter will return any type of data persisted in localStorage.
    **/
-  set(key: string, value: any): Promise<any> {}
+  set(key: string, value: any): any {}
   /**
    * @method remove
    * @param {string} key Storage key name
@@ -31,7 +31,7 @@ export class Storage {
    * @description
    * This method will remove a localStorage item from the client.
    **/
-  remove(key: string): Promise<any> {}
+  remove(key: string): any {}
 }
 /**
  * @module InternalStorage
