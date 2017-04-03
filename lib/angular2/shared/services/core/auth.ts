@@ -1,5 +1,8 @@
 /* tslint:disable */
+import {subscribeOn} from "rxjs/operator/subscribeOn";
 declare var Object: any;
+
+import {Observable, Subject} from "rxjs"
 import {Injectable, Inject} from '@angular/core';
 import {InternalStorage} from '../../storage/storage.swaps';
 import {SDKToken} from '../../models/BaseModels';
@@ -23,7 +26,7 @@ export class LoopBackAuth {
    **/
   protected prefix: string = '$LoopBackSDK$';
 
-  private loadedToken: Promise<any>;
+  private loadedToken: Subject<any>;
 
   /**
    * @method constructor
@@ -32,29 +35,28 @@ export class LoopBackAuth {
    * The constructor will initialize the token loading data from storage
    **/
   constructor(@Inject(InternalStorage) protected storage: InternalStorage) {
-    this.loadedToken = new Promise((resolve, reject) => {
-      Promise.all([
-        this.load('id'),
-        this.load('user'),
-        this.load('userId'),
-        this.load('issuedAt'),
-        this.load('created'),
-        this.load('ttl'),
-        this.load('rememberMe')
-      ]).then(data => {
-        this.token.id = data[0];
-        this.token.user = data[1];
-        this.token.userId = data[2];
-        this.token.issuedAt = data[3];
-        this.token.created = data[4];
-        this.token.ttl = data[5];
-        this.token.rememberMe = data[6];
-        resolve(this.token);
-      });
+    this.loadedToken = new Subject();
+    Observable.forkJoin(
+      this.load('id'),
+      this.load('user'),
+      this.load('userId'),
+      this.load('issuedAt'),
+      this.load('created'),
+      this.load('ttl'),
+      this.load('rememberMe')
+    ).subscribe(data => {
+      this.token.id = data[0];
+      this.token.user = data[1];
+      this.token.userId = data[2];
+      this.token.issuedAt = data[3];
+      this.token.created = data[4];
+      this.token.ttl = data[5];
+      this.token.rememberMe = data[6];
+      this.loadedToken.next(this.token);
     });
   }
 
-  public ready():Promise<any>{
+  public ready():Observable<any>{
     return this.loadedToken;
   }
 
@@ -65,7 +67,7 @@ export class LoopBackAuth {
    * @description
    * This method will set a flag in order to remember the current credentials
    **/
-  public setRememberMe(value: boolean): Promise<any> {
+  public setRememberMe(value: boolean): Observable<any> {
     return this.persist("rememberMe", value);
   }
 
@@ -77,7 +79,7 @@ export class LoopBackAuth {
    * This method will update the user information and persist it if the
    * rememberMe flag is set.
    **/
-  public setUser(user: any): Promise<any> {
+  public setUser(user: any): Observable<any> {
     this.token.user = user;
     return this.save();
   }
@@ -89,7 +91,7 @@ export class LoopBackAuth {
    * @description
    * This method will set a flag in order to remember the current credentials
    **/
-  public setToken(token: SDKToken): Promise<any> {
+  public setToken(token: SDKToken): Observable<any> {
     this.token = Object.assign(this.token, token);
     return this.save();
   }
@@ -100,10 +102,12 @@ export class LoopBackAuth {
    * @description
    * This method will set a flag in order to remember the current credentials.
    **/
-  public getToken(): Promise<SDKToken> {
-    return this.ready().then(() => {
-      return Promise.resolve(this.token);
+  public getToken(): Observable<SDKToken> {
+    let subject = new Subject();
+    this.ready().subscribe(() => {
+      subject.next(this.token);
     });
+    return subject;
   }
 
   /**
@@ -112,7 +116,7 @@ export class LoopBackAuth {
    * @description
    * This method will return the actual token string, not the object instance.
    **/
-  public getAccessTokenId(): Promise<any> {
+  public getAccessTokenId(): Observable<any> {
     return this.load('id');
   }
 
@@ -122,7 +126,7 @@ export class LoopBackAuth {
    * @description
    * This method will return the current user id, it can be number or string.
    **/
-  public getCurrentUserId(): Promise<any> {
+  public getCurrentUserId(): Observable<any> {
     return this.load("userId");
   }
 
@@ -132,14 +136,16 @@ export class LoopBackAuth {
    * @description
    * This method will return the current user instance.
    **/
-  public getCurrentUserData(): Promise<any> {
-    return this.load("user").then(user => {
+  public getCurrentUserData(): Observable<any> {
+    let subject = new Subject();
+    this.load("user").subscribe(user => {
       let parsedUser = (typeof user === 'string') ? JSON.parse(user) : user;
-      return Promise.resolve(parsedUser);
-    })
+      subject.next(parsedUser);
+    });
+    return subject;
   }
 
-  public getRememberMe(): Promise<any> {
+  public getRememberMe(): Observable<any> {
     return this.load("rememberMe");
   }
 
@@ -150,11 +156,12 @@ export class LoopBackAuth {
    * This method will save in either local storage or cookies the current credentials.
    * But only if rememberMe is enabled.
    **/
-  public save(): Promise<any> {
-    return this.getRememberMe().then(rememberMe => {
+  public save(): Observable<any> {
+    let subject = new Subject();
+    this.getRememberMe().subscribe(rememberMe => {
 
       if (rememberMe) {
-        return Promise.all([
+        Observable.forkJoin(
           this.persist('id', this.token.id),
           this.persist('user', this.token.user),
           this.persist('userId', this.token.userId),
@@ -162,13 +169,13 @@ export class LoopBackAuth {
           this.persist('created', this.token.created),
           this.persist('ttl', this.token.ttl),
           this.persist('rememberMe', this.token.rememberMe),
-        ]);
+        ).subscribe(() => subject.next());
       } else {
-        return Promise.resolve(false);
+        subject.next();
       }
 
     });
-
+    return subject;
   };
 
   /**
@@ -178,8 +185,8 @@ export class LoopBackAuth {
    * @description
    * This method will load either from local storage or cookies the provided property.
    **/
-  protected load(prop: string): Promise<any> {
-    return this.storage.get(`${this.prefix}${prop}`);
+  protected load(prop: string): Observable<any> {
+    return Observable.fromPromise(this.storage.get(`${this.prefix}${prop}`));
   }
 
   /**
@@ -188,13 +195,15 @@ export class LoopBackAuth {
    * @description
    * This method will clear cookies or the local storage.
    **/
-  public clear(): void {
-    return Promise.all(Object.keys(this.token).map(prop => {
-      return this.storage.remove(`${this.prefix}${prop}`)
-    })).then(val => {
+  public clear(): Observable<any> {
+    let subject = new Subject();
+    Observable.forkJoin(Object.keys(this.token).map(prop => {
+      this.storage.remove(`${this.prefix}${prop}`)
+    })).subscribe(val => {
       this.token = new SDKToken();
-      return Promise.resolve(val);
+      return subject.next(val);
     });
+    return subject;
   }
 
   /**
@@ -203,7 +212,7 @@ export class LoopBackAuth {
    * @description
    * This method will clear cookies or the local storage.
    **/
-  protected persist(prop: string, value: any): Promise<any> {
+  protected persist(prop: string, value: any): Observable<any> {
     try {
       return this.storage.set(
         `${this.prefix}${prop}`,
