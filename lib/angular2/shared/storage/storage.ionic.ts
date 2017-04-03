@@ -2,6 +2,7 @@
 /* tslint:disable */
 import { Injectable } from '@angular/core';
 import { Storage } from "@ionic/storage";
+import {Observable} from "rxjs";
 
 
 /**
@@ -28,10 +29,10 @@ export class StorageIonic {
      * @description
      * The getter will return any type of data persisted in localStorage.
      **/
-    get(key: string): Promise<any> {
-        return this.storage.get(key).then(data => {
+    get(key: string): Observable<any> {
+        return Observable.fromPromise(this.storage.get(key).then(data => {
             return Promise.resolve(this.parse(data))
-        });
+        }));
     }
 
     /**
@@ -42,11 +43,11 @@ export class StorageIonic {
      * @description
      * The setter will return any type of data persisted in localStorage.
      **/
-    set(key: string, value: any): Promise<any> {
-        return this.storage.set(
+    set(key: string, value: any): Observable<any> {
+        return Observable.fromPromise(this.storage.set(
             key,
             typeof value === 'object' ? JSON.stringify(value) : value
-        );
+        ));
     }
     /**
      * @method remove
@@ -55,8 +56,8 @@ export class StorageIonic {
      * @description
      * This method will remove a localStorage item from the client.
      **/
-    remove(key: string): Promise<any> {
-        return this.storage.remove(key)
+    remove(key: string): Observable<any> {
+        return Observable.fromPromise(this.storage.remove(key));
     }
     /**
      * @method parse
