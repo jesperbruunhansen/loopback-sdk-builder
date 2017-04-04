@@ -56,7 +56,7 @@ export class LoopBackAuth {
     });
   }
 
-  public ready():Observable<any>{
+  public ready(): Observable<any> {
     return this.loadedToken;
   }
 
@@ -157,25 +157,16 @@ export class LoopBackAuth {
    * But only if rememberMe is enabled.
    **/
   public save(): Observable<any> {
-    let subject = new Subject();
-    this.getRememberMe().subscribe(rememberMe => {
 
-      if (rememberMe) {
-        Observable.forkJoin(
-          this.persist('id', this.token.id),
-          this.persist('user', this.token.user),
-          this.persist('userId', this.token.userId),
-          this.persist('issuedAt', this.token.issuedAt),
-          this.persist('created', this.token.created),
-          this.persist('ttl', this.token.ttl),
-          this.persist('rememberMe', this.token.rememberMe),
-        ).subscribe(() => subject.next());
-      } else {
-        subject.next();
-      }
-
-    });
-    return subject;
+    return Observable.forkJoin(
+      this.persist('id', this.token.id),
+      this.persist('user', this.token.user),
+      this.persist('userId', this.token.userId),
+      this.persist('issuedAt', this.token.issuedAt),
+      this.persist('created', this.token.created),
+      this.persist('ttl', this.token.ttl),
+      this.persist('rememberMe', this.token.rememberMe),
+    )
   };
 
   /**
