@@ -189,7 +189,7 @@ export class LoopBackAuth {
   public clear(): Observable<any> {
     let subject = new Subject();
     Observable.forkJoin(Object.keys(this.token).map(prop => {
-      this.storage.remove(`${this.prefix}${prop}`)
+      return this.storage.remove(`${this.prefix}${prop}`)
     })).subscribe(val => {
       this.token = new SDKToken();
       return subject.next(val);
