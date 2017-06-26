@@ -1,0 +1,18 @@
+{
+  "loopback-component-explorer": {
+    "mountPath": "/explorer"
+  },
+  "@mean-expert/loopback-component-realtime": {
+    "auth": true,
+    "debug": false,
+    "driver": {
+      "name": "socket.io",
+      "options": {
+        "adapter": {
+          "name": "socket.io-adapter-mongo",
+          "datasource": "mongodb"
+        }
+      }
+    }
+  }
+}
