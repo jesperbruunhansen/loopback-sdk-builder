@@ -160,7 +160,6 @@ export class LoopBackAuth {
       this.persist('id', this.token.id),
       this.persist('user', this.token.user),
       this.persist('userId', this.token.userId),
-      this.persist('issuedAt', this.token.issuedAt),
       this.persist('created', this.token.created),
       this.persist('ttl', this.token.ttl),
       this.persist('rememberMe', this.token.rememberMe),
