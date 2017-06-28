@@ -40,7 +40,6 @@ export class LoopBackAuth {
       this.load('id'),
       this.load('user'),
       this.load('userId'),
-      this.load('issuedAt'),
       this.load('created'),
       this.load('ttl'),
       this.load('rememberMe')
@@ -48,10 +47,9 @@ export class LoopBackAuth {
       this.token.id = data[0];
       this.token.user = data[1];
       this.token.userId = data[2];
-      this.token.issuedAt = data[3];
-      this.token.created = data[4];
-      this.token.ttl = data[5];
-      this.token.rememberMe = data[6];
+      this.token.created = data[3];
+      this.token.ttl = data[4];
+      this.token.rememberMe = data[5];
       this.loadedToken.next(this.token);
     });
   }
