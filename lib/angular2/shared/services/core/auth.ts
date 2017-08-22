@@ -149,7 +149,7 @@ export class LoopBackAuth {
 
   /**
    * @method save
-   * @return {boolean} Wether or not the information was saved
+   * @return {boolean} Whether or not the information was saved
    * @description
    * This method will save in either local storage or cookies the current credentials.
    * But only if rememberMe is enabled.
@@ -195,10 +195,10 @@ export class LoopBackAuth {
   }
 
   /**
-   * @method clear
+   * @method persist
    * @return {void}
    * @description
-   * This method will clear cookies or the local storage.
+   * This method saves values to storage
    **/
   protected persist(prop: string, value: any): Observable<any> {
     try {
